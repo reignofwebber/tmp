@@ -20,7 +20,7 @@
 
 #if defined(DEBUG)
 
-#include "../settings.hpp"
+// #include "../settings.hpp"
 
 #endif  // DEBUG
 
@@ -38,7 +38,7 @@ class Message {
 
     ~Message() {}
 
-    static Message msg(const std::string &type, const std::string &id,
+    static std::string msg(const std::string &type, const std::string &id,
                         const std::unordered_map<std::string, std::string> &strings,
                         const std::unordered_map<std::string, std::vector<std::string>> &arrays) {
                             Message msg;
@@ -46,7 +46,7 @@ class Message {
                             msg.setType(type);
                             msg.setStrings(strings);
                             msg.setArrays(arrays);
-                            return msg;
+                            return msg.toXmlWithLength();
                         }
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -61,15 +61,16 @@ class Message {
         boost::property_tree::write_xml(s, pt_, xml_writer_settings<std::string>());
 
 #if defined(DEBUG)
-        Settings &settings = Settings::getInstance();
-        std::string tmp = s.str();
-        if (settings.debug_xml_msg_type == "") {
-            log_trace << tmp;
-        } else if (settings.debug_xml_msg_type == type_ && settings.debug_xml_msg_id == "") {
-            log_trace << tmp;
-        } else if (settings.debug_xml_msg_type == type_ && settings.debug_xml_msg_id == id_) {
-            log_trace << tmp;
-        }
+        // Settings &settings = Settings::getInstance();
+        // std::string tmp = s.str();
+        // if (settings.debug_xml_msg_type == "") {
+        //     log_trace << tmp;
+        // } else if (settings.debug_xml_msg_type == type_ && settings.debug_xml_msg_id == "") {
+        //     log_trace << tmp;
+        // } else if (settings.debug_xml_msg_type == type_ && settings.debug_xml_msg_id == id_) {
+        //     log_trace << tmp;
+        // }
+        log_trace << s.str();
 #endif  // DEBUG
         return s.str();
     }
@@ -132,11 +133,23 @@ class Message {
     }
 
     std::string getString(const std::string &s) const {
+        if (strings_.find(s) == strings_.end()) {
+            log_error << "no string named " << s;
+            return "";
+        }
         return strings_.at(s);
     }
 
     std::unordered_map<std::string, std::string> getStrings() const {
         return strings_;
+    }
+
+    std::vector<std::string> getArray(const std::string &s) const {
+        if (arrays_.find(s) == arrays_.end()) {
+            log_error << "no string named " << s;
+            return {};
+        }
+        return arrays_.at(s);
     }
 
     std::unordered_map<std::string, std::vector<std::string>> getArrays() const {

@@ -5,6 +5,7 @@
 #include <utility>
 #include <algorithm>
 #include <exception>
+#include <memory>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -13,32 +14,75 @@
 // local
 #include "log.h"
 #include "message.h"
-
+#include "server.h"
 
 void Manager::start() {
     initPIO();
 }
 
-void Manager::welcome() {
-    // pio config
-    add_to_send_queue(m_pioConfig);
-}
-
-void Manager::updatePIOStatus(const std::string &ci, const std::string pio_id, bool status) {
-    try {
-        auto &pioInfo = m_pioConfig.pioList[ci][pio_id];
-        if (pioInfo.status != status) {
-            pioInfo.status = status;
-
-            add_to_send_queue(pioInfo);
+void Manager::process(SessionPtr session, const std::string &msg) {
+    auto mobj = getMessageObject(msg);
+    if (!mobj) return;
+    std::string msgToWrite;
+    auto identifier = mobj->getMessageIdentifier();
+    if (identifier == C2S_Authentication) {
+        auto obj = std::dynamic_pointer_cast<C2SAuthentication>(mobj);
+        S2CAuthenticationReply reply;
+        if (obj->username == "admin" && obj->password == "123456") {
+            reply.success = true;
+            verifyed_sessions.insert(session);
+        } else {
+            reply.success = false;
+            reply.reason = "username or password error";
         }
-    } catch (const std::exception &e) {
-        log_error << e.what();
+        msgToWrite = reply.msg();
+    } else if (identifier == C2S_Configuration) {
+        auto obj = std::dynamic_pointer_cast<C2SConfiguration>(mobj);
+        S2CConfigurationReply reply;
+        reply.success = true;
+        msgToWrite = reply.msg();
+    } else if (identifier == C2S_Subscription) {
+        // TODO(zf)
+
+        // has verified
+        if (verifyed_sessions.find(session) != verifyed_sessions.end()) {
+            sessions.insert(session);
+        } else {
+            log_info << "session is not verified!";
+        }
+    } else if (identifier == C2S_Playback_Start) {
+        // TODO(zf)
+    } else if (identifier == C2S_Playback_Option) {
+        // TODO(zf)
+    } else if (identifier == C2S_Playback_Control) {
+        // TODO(zf)
+    } else if (identifier == C2S_HeartBeat) {
+        // TODO(zf)
+    } else if (identifier == C2S_Close) {
+        // TODO(zf)
     }
+
+
+    session->writeMessage(msgToWrite);
 }
 
-void Manager::add_to_send_queue(const MessageObject &mobj) {
-    log_info << mobj.msg();
+void Manager::unregiste(SessionPtr session) {
+    sessions.erase(session);
+}
+
+void Manager::welcome(SessionPtr session) {
+    // pio config
+
+}
+
+void Manager::add_to_send_queue(std::shared_ptr<MessageObject> mobj) {
+    std::for_each(sessions.begin(), sessions.end(), [=](SessionPtr session) {
+        session->writeMessage(mobj->msg());
+    });
+}
+
+void Manager::add_to_send_queue(const std::string &msg) {
+    
 }
 
 void Manager::initPIO() {
@@ -52,7 +96,7 @@ void Manager::initPIO() {
 
         // get pios
         for (auto &p : pt_ci) {
-            PIOInfo info;
+            S2CCIMEt info;
             info.ci = ci;
             info.id = p.second.get<std::string>("<xmlattr>.id", "");
             info.type = p.second.get<std::string>("<xmlattr>.type", "");

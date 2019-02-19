@@ -1,0 +1,135 @@
+{
+    "S2C_CIM_EtIn" : [
+        {
+            "id" : "CI-CSNHKC",
+            "pos" : "617",
+            "status" : "true",
+            "status1" : "true|false|Invalid",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-LLB",
+            "pos" : "100",
+            "status" : "true",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-CSDNXLS",
+            "pos" : "200",
+            "status" : "true",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-CSXBXLS",
+            "pos" : "2000",
+            "status" : "true|false|Invalid",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        }
+    ],
+    "S2C_CIM_EtOut" : [
+        {
+            "id" : "CI-CSNHKC",
+            "pos" : "617",
+            "status" : "true",
+            "status1" : "true|false|Invalid",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-LLB",
+            "pos" : "100",
+            "status" : "true",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-CSDNXLS",
+            "pos" : "200",
+            "status" : "true",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        },
+        {
+            "id" : "CI-CSXBXLS",
+            "pos" : "2000",
+            "status" : "true|false|Invalid",
+            "status1" : "false",
+            "status2" : "Invalid",
+            "description" : "test CI-CSNHKC"
+        }
+    ],
+    "S2C_CIM_Status" : [
+        {
+            "ci" : "CI-CSNHKC",
+            "index" : "1",
+            "status" : "Master|Slave|Standby|Simu|Offline",
+            "description" : "test CIM status1"
+        },
+        {
+            "ci" : "CI-LLB",
+            "index" : "2",
+            "status" : "Master|Slave|Standby|Simu|Offline",
+            "description" : "test CIM status2"
+        },
+        {
+            "ci" : "CI-CSDNXLS",
+            "index" : "2",
+            "status" : "Master|Slave|Standby|Simu|Offline",
+            "description" : "test CIM status3"
+        },
+        {
+            "ci" : "CI-CSXBXLS",
+            "index" : "2",
+            "status" : "Master|Slave|Standby|Simu|Offline",
+            "description" : "test CIM status4"
+        }
+    ],
+    "S2C_CIM_KxStatus" : [
+        {
+            "ci" : "CI-CSNHKC",
+            "id" : "KX-1",
+            "index" : "1",
+            "status" : "Master|Slave|Fault|Invalid|Unknown",
+            "status1" : "Master|Slave|Fault|Invalid|Unknown",
+            "status2" : "Master|Slave|Fault|Invalid|Unknown",
+            "description" : "test CIM kxstatus1"
+        },
+        {
+            "ci" : "CI-LLB",
+            "id" : "KX-2",
+            "index" : "2",
+            "status" : "Master|Slave|Fault|Invalid|Unknown",
+            "status1" : "Master|Slave|Fault|Invalid|Unknown",
+            "status2" : "Master|Slave|Fault|Invalid|Unknown",
+            "description" : "test CIM kxstatus2"
+        },
+        {
+            "ci" : "CI-CSDNXLS",
+            "id" : "KX-1",
+            "index" : "2",
+            "status" : "Master|Slave|Fault|Invalid|Unknown",
+            "status1" : "Master|Slave|Fault|Invalid|Unknown",
+            "status2" : "Master|Slave|Fault|Invalid|Unknown",
+            "description" : "test CIM kxstatus3"
+        },
+        {
+            "ci" : "CI-CSXBXLS",
+            "id" : "KX-2",
+            "index" : "2",
+            "status" : "Master|Slave|Fault|Invalid|Unknown",
+            "status1" : "Master|Slave|Fault|Invalid|Unknown",
+            "status2" : "Master|Slave|Fault|Invalid|Unknown",
+            "description" : "test CIM kxstatus4"
+        }
+    ]
+
+}

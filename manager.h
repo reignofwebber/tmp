@@ -3,7 +3,7 @@
 
 // std
 #include <string>
-#include <vector>
+#include <set>
 #include <map>
 
 // local
@@ -16,30 +16,25 @@ class Manager {
 
     void start();
 
-    void welcome();
+    void process(SessionPtr session, const std::string &msg);
+    void unregiste(SessionPtr session);
 
-    // set pio status
-    /**
-     * ci
-     * pos
-     * status true or false
-     * status1
-     * status2
-     * description
-     * timestamp
-     *
-     * UI_CIM_et_in
-     * UI_CIM_et_out
-     */
-    void updatePIOStatus(const std::string &ci, const std::string pio_id, bool status);
+    void welcome(SessionPtr session);
+
+
+    void add_to_send_queue(std::shared_ptr<MessageObject> mobj);
+    void add_to_send_queue(const std::string &msg);
 
  private:
     void initPIO();
 
-    void add_to_send_queue(const MessageObject &mobj);
+
 
  private:
-    PIOConfig m_pioConfig;
+    std::set<SessionPtr> verifyed_sessions;
+    std::set<SessionPtr> sessions;
+
+    S2CCIMEtConfig m_pioConfig;
 };
 
 
