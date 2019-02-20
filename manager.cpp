@@ -43,10 +43,10 @@ void Manager::process(SessionPtr session, const std::string &msg) {
         msgToWrite = reply.msg();
     } else if (identifier == C2S_Subscription) {
         // TODO(zf)
-
         // has verified
         if (verifyed_sessions.find(session) != verifyed_sessions.end()) {
-            sessions.insert(session);
+            C2SSubscription s;
+            sessions.insert(std::make_pair(session, Unimplement_RuleSet));
         } else {
             log_info << "session is not verified!";
         }
@@ -76,8 +76,11 @@ void Manager::welcome(SessionPtr session) {
 }
 
 void Manager::add_to_send_queue(std::shared_ptr<MessageObject> mobj) {
-    std::for_each(sessions.begin(), sessions.end(), [=](SessionPtr session) {
-        session->writeMessage(mobj->msg());
+    std::for_each(sessions.begin(), sessions.end(), [=](const std::pair<SessionPtr, RuleSet> &p) {
+        auto rulesets = mobj->getRuleSet();
+        if (std::find(rulesets.begin(), rulesets.end(), p.second) != rulesets.end()) {
+            p.first->writeMessage(mobj->msg());
+        }
     });
 }
 

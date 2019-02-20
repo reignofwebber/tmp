@@ -36,31 +36,33 @@ std::string TaskEngine::parse(const std::string &s) {
     choices.push_back(s.substr(lastPos));
 
     auto res = choices.at(rand() % choices.size());
-
+    // rand_r
 
     return res;
 }
 
-std::shared_ptr<MessageObject> TaskEngine::getOne() {
-    if (m_msgIndex == m_msgList.size()) {
-        m_msgIndex = 0;
+std::shared_ptr<MessageObject> TaskEngine::getOne(RuleSet set) {
+    if (m_msgIndex.at(set) == m_msgList.at(set).size()) {
+        m_msgIndex[set] = 0;
     }
-    return m_msgList.at(m_msgIndex++);
+
+    return m_msgList.at(set).at(m_msgIndex[set]++);
 }
 
 uint32_t TaskEngine::getTaskCount() const {
     return m_msgList.size();
 }
-uint32_t TaskEngine::getTaskIndex() const {
-    if (m_msgIndex == m_msgList.size()) {
+uint32_t TaskEngine::getTaskIndex(RuleSet set) const {
+    if (m_msgIndex.at(set) == m_msgList.at(set).size()) {
         return 0;
     }
-    return m_msgIndex;
+    return m_msgIndex.at(set);
 }
 
 void TaskEngine::readTask(boost::property_tree::ptree &pt, const std::string &protocol) {
     #define READS(str) pt.get<std::string>(str)
     #define PREADS(str) parse(READS(str))
+    #define QUEUE(mobj) m_msgList.push_back(mobj)
 
     if (protocol == "S2C_CIM_EtIn") {
         auto mobj = std::make_shared<S2CCIMEt>();
@@ -72,7 +74,8 @@ void TaskEngine::readTask(boost::property_tree::ptree &pt, const std::string &pr
         mobj->status1 = PREADS("status1");
         mobj->status2 = PREADS("status2");
         mobj->description = READS("description");
-        m_msgList.push_back(mobj);
+                
+        m_msgList[All_RuleSet].push_back(mobj);
     } else if (protocol == "S2C_CIM_EtOut") {
         S2CCIMEt et;
         auto mobj = std::make_shared<S2CCIMEt>();
@@ -84,7 +87,6 @@ void TaskEngine::readTask(boost::property_tree::ptree &pt, const std::string &pr
         mobj->status1 = PREADS("status1");
         mobj->status2 = PREADS("status2");
         mobj->description = READS("description");
-        m_msgList.push_back(mobj);
     } else if (protocol == "S2C_CIM_Status") {
         auto mobj = std::make_shared<S2CCIMStatus>();
 
@@ -92,7 +94,6 @@ void TaskEngine::readTask(boost::property_tree::ptree &pt, const std::string &pr
         mobj->index = READS("index");
         mobj->status = PREADS("status");
         mobj->description = READS("description");
-        m_msgList.push_back(mobj);
     } else if (protocol == "S2C_CIM_KxStatus") {
         auto mobj = std::make_shared<S2CCIMKxStatus>();
 
@@ -102,7 +103,9 @@ void TaskEngine::readTask(boost::property_tree::ptree &pt, const std::string &pr
         mobj->status1 = PREADS("status1");
         mobj->status2 = PREADS("status2");
         mobj->description = READS("description");
-        m_msgList.push_back(mobj);
     }
 
+    #undef READS
+    #undef PREADS
+    #undef QUEUE
 }

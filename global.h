@@ -16,6 +16,7 @@ enum Message_Type {
 };
 
 enum RuleSet {
+    All_RuleSet,    
     Unimplement_RuleSet,
 };
 

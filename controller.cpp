@@ -1,5 +1,9 @@
 #include "controller.h"
 
+// std
+#include <vector>
+#include <algorithm>
+
 // local
 #include "log.h"
 #include "random_engine.h"
@@ -16,6 +20,16 @@ Controller::~Controller() {
     }
 }
 
+void Controller::subscribe(RuleSet set) {
+    std::lock_guard<std::mutex> lk(mtx_);
+    ruleSets_.insert(set);
+}
+
+void Controller::unsubscribe(RuleSet set) {
+    std::lock_guard<std::mutex> lk(mtx_);
+    ruleSets_.erase(set);
+}
+
 void Controller::start() {
     updateTh_ = std::thread(&Controller::update, this);
 }
@@ -27,9 +41,21 @@ void Controller::update() {
     engine.init();
 
     while (true) {
-        log_info << "polling tasks... " << engine.getTaskIndex();
+        std::vector<RuleSet> set_copy;
 
-        mgr_->add_to_send_queue(engine.getOne());
+        std::unique_lock<std::mutex> lk(mtx_);
+        std::copy(ruleSets_.begin(), ruleSets_.end(), std::back_inserter(set_copy));
+        lk.unlock();
+
+        for (RuleSet set : ruleSets_) {
+            log_info << "polling tasks... ruleset " << static_cast<uint16_t>(set) << ", index " << engine.getTaskIndex(set);
+            mgr_->add_to_send_queue(engine.getOne(set));
+        }
+
+
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
+
+

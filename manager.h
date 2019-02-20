@@ -32,7 +32,8 @@ class Manager {
 
  private:
     std::set<SessionPtr> verifyed_sessions;
-    std::set<SessionPtr> sessions;
+   //  std::set<SessionPtr> sessions;
+    std::map<SessionPtr, RuleSet> sessions;
 
     S2CCIMEtConfig m_pioConfig;
 };

@@ -194,6 +194,9 @@ struct MessageObject {
     virtual std::string msg() const {
         return "";
     }
+    virtual std::vector<RuleSet> getRuleSet() {
+        return {};
+    }
 };
 
 #define DECLARE_IDENTIFIER()                                \

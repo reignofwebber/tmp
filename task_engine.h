@@ -4,6 +4,7 @@
 
 // std
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
@@ -20,14 +21,14 @@ class TaskEngine {
     void init();
 
     uint32_t getTaskCount() const;
-    uint32_t getTaskIndex() const;
-    std::shared_ptr<MessageObject> getOne();
+    uint32_t getTaskIndex(RuleSet set) const;
+    std::shared_ptr<MessageObject> getOne(RuleSet set);
 
  private:
     void readTask(boost::property_tree::ptree &pt, const std::string &protocol);
     std::string parse(const std::string &s);
-    uint32_t m_msgIndex{0};
-    std::vector<std::shared_ptr<MessageObject>> m_msgList;
+    std::map<RuleSet, uint32_t> m_msgIndex;
+    std::map<RuleSet, std::vector<std::shared_ptr<MessageObject>>> m_msgList;
 
 };
 
