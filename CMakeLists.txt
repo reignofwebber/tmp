@@ -33,4 +33,5 @@ target_compile_features(mmServ PRIVATE cxx_std_11)
 
 configure_file(${CMAKE_SOURCE_DIR}/config/pio_config.xml ${CMAKE_BINARY_DIR}/config/pio_config.xml COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/config/ci_config.xml ${CMAKE_BINARY_DIR}/config/ci_config.xml COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/config/task.json ${CMAKE_BINARY_DIR}/config/task.json COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/task.cim.json ${CMAKE_BINARY_DIR}/config/task.cim.json COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/task.overallstatus.json ${CMAKE_BINARY_DIR}/config/task.overallstatus.json COPYONLY)

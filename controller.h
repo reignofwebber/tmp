@@ -2,7 +2,9 @@
 #define CONTROLLER_H_
 
 // std
+#include <string>
 #include <set>
+#include <utility>
 #include <thread>
 #include <memory>
 #include <mutex>
@@ -20,6 +22,8 @@ class Controller {
     void start();
     void subscribe(RuleSet set);
     void unsubscribe(RuleSet set);
+    void subscribe(const std::string &id, const std::pair<RuleSet, Subscribe_Level> &ruleSets);
+    void unsubscribe(const std::string &id, const std::pair<RuleSet, Subscribe_Level> &ruleSets);
 
  private:
     void update();
@@ -28,6 +32,9 @@ class Controller {
     std::thread updateTh_;
     std::shared_ptr<Manager> mgr_;
     std::set<RuleSet> ruleSets_;
+
+    std::set<IndentiSet> sets_;
+
     std::mutex mtx_;
 };
 

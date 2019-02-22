@@ -41,17 +41,27 @@ void Controller::update() {
     engine.init();
 
     while (true) {
-        std::vector<RuleSet> set_copy;
+        // std::vector<RuleSet> set_copy;
 
-        std::unique_lock<std::mutex> lk(mtx_);
-        std::copy(ruleSets_.begin(), ruleSets_.end(), std::back_inserter(set_copy));
-        lk.unlock();
+        // std::unique_lock<std::mutex> lk(mtx_);
+        // std::copy(ruleSets_.begin(), ruleSets_.end(), std::back_inserter(set_copy));
+        // lk.unlock();
 
-        for (RuleSet set : ruleSets_) {
-            log_info << "polling tasks... ruleset " << static_cast<uint16_t>(set) << ", index " << engine.getTaskIndex(set);
-            mgr_->add_to_send_queue(engine.getOne(set));
+        std::vector<IndentiSet> set_copy;
+        mtx_.lock();
+        std::copy(sets_.begin(), sets_.end(), std::back_inserter(set_copy));
+        mtx_.unlock();
+
+        // for (RuleSet set : ruleSets_) {
+        //     log_info << "polling tasks... ruleset " << static_cast<uint16_t>(set) << ", index " << engine.getTaskIndex(set);
+        //     mgr_->add_to_send_queue(engine.getOne(set));
+        // }
+
+        // engine.getOne("deviceId", std::make_pair(ruleSets_, level));
+
+        for (const auto &rule : sets_) {
+            mgr_->add_to_send_queue(engine.getOne(rule.id, rule.ruleSet));
         }
-
 
 
         std::this_thread::sleep_for(std::chrono::seconds(1));

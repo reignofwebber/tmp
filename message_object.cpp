@@ -10,6 +10,34 @@
 // local
 #include "message.h"
 
+#define READS(str) pt.get<std::string>(str)
+#define READ64(str) pt.get<int64_t>(str)
+#define READU64(str) pt.get<uint64_t>(str)
+#define PREADS(str) parse(READS(str))
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// only for internal use
+std::string parse(const std::string &s);
+
+std::shared_ptr<MessageObject> createMessageObject(const std::string &identifier) {
+    #define REGISTE(objname, obj)                       \
+    if (identifier == objname) {                        \
+        return std::make_shared<obj>();                 \
+    }
+
+    REGISTE("S2C_OverallStatus_DeviceAlarmItem", S2COverallStatusDeviceAlarmItem)
+    REGISTE("S2C_OverallStatus_DeviceEarlywarnItem", S2COverallStatusDeviceEarlywarnItem)
+    REGISTE("S2C_OverallStatus_DeviceStatus", S2COverallStatusDeviceStatus)
+    REGISTE("S2C_OverallStatus_StationAlarmItem", S2COverallStatusStationAlarmItem)
+    REGISTE("S2C_OverallStatus_StationEarlywarnItem", S2COverallStatusStationEarlywarnItem)
+    REGISTE("S2C_OverallStatus_DeviceAlarm", S2COverallStatusDeviceAlarm)
+    REGISTE("S2C_OverallStatus_StationEarlywarn", S2COverallStatusStationEarlywarn)
+    REGISTE("S2C_OverallStatus_StationAlarm", S2COverallStatusStationAlarm)
+
+
+
+    return nullptr;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<MessageObject> getMessageObject(const std::string &msg) {
@@ -456,6 +484,314 @@ std::string S2CStaticConfigTelegram::msg() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 综合状态展示
+void S2COverallStatusDeviceAlarmItem::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    id = READS("device");
+    isNew = READS("new");
+    AlarmItem alarm;
+    for (const auto &item : pt.get_child("items")) {
+        alarm.device = item.second.get<std::string>("device");
+        alarm.id = item.second.get<std::string>("_id");
+        alarm.time = item.second.get<uint64_t>("time");
+        alarm.level = item.second.get<std::string>("level");
+        alarm.type = item.second.get<std::string>("type");
+        alarm.description = item.second.get<std::string>("description");
+        alarm.isRecover = item.second.get<std::string>("recover");
+        alarm.recoverTime = item.second.get<uint64_t>("recover_time");
+        alarm.measure = item.second.get<std::string>("measure");
+        alarm.isConfirm = item.second.get<std::string>("confirm");
+        alarm.confirmTime = item.second.get<uint64_t>("confirm_time");
+        alarm.confirmDesc = item.second.get<std::string>("confirm_dsc");
+        itemList.push_back(alarm);
+    }
+}
+
+std::string S2COverallStatusDeviceAlarmItem::msg() const {
+    Message res;
+    res.setType("UI_OVERALL_STATUS");
+    res.setId("deviceAlarmItem");
+    res.addString("station", station);
+    res.addString("device", id);
+    res.addString("new", isNew);
+    std::vector<Message> msgs;
+    for (const auto &item : itemList) {
+        Message msg;
+        msg.addString("device", item.device);
+        msg.addString("_id", item.id);
+        msg.addString("time", item.time);
+        msg.addString("level", item.level);
+        msg.addString("type", item.type);
+        msg.addString("description", item.description);
+        msg.addString("recover", item.isRecover);
+        msg.addString("recover_time", item.recoverTime);
+        msg.addString("measure", item.measure);
+        msg.addString("confirm", item.isConfirm);
+        msg.addString("confirm_time", item.confirmTime);
+        msg.addString("confirm_dsc", item.confirmDesc);
+        msgs.push_back(msg);
+    }
+    res.addPacketArray("items", msgs);
+    return res.toXmlWithLength();
+}
+
+void S2COverallStatusDeviceEarlywarnItem::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    id = READS("device");
+    isNew = READS("new");
+    AlarmItem alarm;
+    for (const auto &item : pt.get_child("items")) {
+        alarm.device = item.second.get<std::string>("device");
+        alarm.id = item.second.get<std::string>("_id");
+        alarm.time = item.second.get<uint64_t>("time");
+        alarm.level = item.second.get<std::string>("level");
+        alarm.type = item.second.get<std::string>("type");
+        alarm.description = item.second.get<std::string>("description");
+        alarm.isRecover = item.second.get<std::string>("recover");
+        alarm.recoverTime = item.second.get<uint64_t>("recover_time");
+        alarm.measure = item.second.get<std::string>("measure");
+        alarm.isConfirm = item.second.get<std::string>("confirm");
+        alarm.confirmTime = item.second.get<uint64_t>("confirm_time");
+        alarm.confirmDesc = item.second.get<std::string>("confirm_dsc");
+        itemList.push_back(alarm);
+    }
+}
+
+std::string S2COverallStatusDeviceEarlywarnItem::msg() const {
+    Message res;
+    res.setType("UI_OVERALL_STATUS");
+    res.setId("deviceEarlywarnItem");
+    res.addString("station", station);
+    res.addString("device", id);
+    res.addString("new", isNew);
+    std::vector<Message> msgs;
+    for (const auto &item : itemList) {
+        Message msg;
+        msg.addString("device", item.device);
+        msg.addString("_id", item.id);
+        msg.addString("time", item.time);
+        msg.addString("level", item.level);
+        msg.addString("type", item.type);
+        msg.addString("description", item.description);
+        msg.addString("recover", item.isRecover);
+        msg.addString("recover_time", item.recoverTime);
+        msg.addString("measure", item.measure);
+        msg.addString("confirm", item.isConfirm);
+        msg.addString("confirm_time", item.confirmTime);
+        msg.addString("confirm_dsc", item.confirmDesc);
+        msgs.push_back(msg);
+    }
+    res.addPacketArray("items", msgs);
+    return res.toXmlWithLength();
+}
+
+void S2COverallStatusDeviceStatus::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    id = READS("device");
+    status = PREADS("status");
+    for (const auto &v : pt.get_child("description")) {
+        description.push_back(v.first);
+    }
+}
+
+std::string S2COverallStatusDeviceStatus::msg() const {
+    Message res;
+    res.setType("UI_OVERALL_STATUS");
+    res.setId("deviceStatus");
+    res.addString("station", station);
+    res.addString("deviceId", id);
+    res.addString("status", status);
+    res.addArray("description", description);
+    std::vector<Message> msgs;
+    for (const auto &deviceStatus : deviceStatusList) {
+        Message msg;
+        msg.addString("linkId", deviceStatus.linkId);
+        msg.addString("linkStatus", deviceStatus.linkStatus);
+        msgs.push_back(msg);
+    }
+    res.addPacketArray(deviceType, msgs);
+    return res.toXmlWithLength();
+}
+
+void S2COverallStatusStationAlarmItem::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    isNew = READS("new");
+    AlarmItem alarm;
+    for (const auto &item : pt.get_child("items")) {
+        alarm.device = item.second.get<std::string>("device");
+        alarm.id = item.second.get<std::string>("_id");
+        alarm.time = item.second.get<uint64_t>("time");
+        alarm.level = item.second.get<std::string>("level");
+        alarm.type = item.second.get<std::string>("type");
+        alarm.description = item.second.get<std::string>("description");
+        alarm.isRecover = item.second.get<std::string>("recover");
+        alarm.recoverTime = item.second.get<uint64_t>("recover_time");
+        alarm.measure = item.second.get<std::string>("measure");
+        alarm.isConfirm = item.second.get<std::string>("confirm");
+        alarm.confirmTime = item.second.get<uint64_t>("confirm_time");
+        alarm.confirmDesc = item.second.get<std::string>("confirm_dsc");
+        itemList.push_back(alarm);
+    }
+}
+
+std::string S2COverallStatusStationAlarmItem::msg() const {
+    Message res;
+    res.setType("UI_OVERALL_STATUS");
+    res.setId("stationAlarmItem");
+    res.addString("station", station);
+    res.addString("new", isNew);
+    std::vector<Message> msgs;
+    for (const auto &item : itemList) {
+        Message msg;
+        msg.addString("device", item.device);
+        msg.addString("_id", item.id);
+        msg.addString("time", item.time);
+        msg.addString("level", item.level);
+        msg.addString("type", item.type);
+        msg.addString("description", item.description);
+        msg.addString("recover", item.isRecover);
+        msg.addString("recover_time", item.recoverTime);
+        msg.addString("measure", item.measure);
+        msg.addString("confirm", item.isConfirm);
+        msg.addString("confirm_time", item.confirmTime);
+        msg.addString("confirm_dsc", item.confirmDesc);
+        msgs.push_back(msg);
+    }
+    res.addPacketArray("items", msgs);
+    return res.toXmlWithLength();
+}
+
+void S2COverallStatusStationEarlywarnItem::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    isNew = READS("new");
+    AlarmItem alarm;
+    for (const auto &item : pt.get_child("items")) {
+        alarm.device = item.second.get<std::string>("device");
+        alarm.id = item.second.get<std::string>("_id");
+        alarm.time = item.second.get<uint64_t>("time");
+        alarm.level = item.second.get<std::string>("level");
+        alarm.type = item.second.get<std::string>("type");
+        alarm.description = item.second.get<std::string>("description");
+        alarm.isRecover = item.second.get<std::string>("recover");
+        alarm.recoverTime = item.second.get<uint64_t>("recover_time");
+        alarm.measure = item.second.get<std::string>("measure");
+        alarm.isConfirm = item.second.get<std::string>("confirm");
+        alarm.confirmTime = item.second.get<uint64_t>("confirm_time");
+        alarm.confirmDesc = item.second.get<std::string>("confirm_dsc");
+        itemList.push_back(alarm);
+    }
+}
+
+std::string S2COverallStatusStationEarlywarnItem::msg() const {
+    Message res;
+    res.setType("UI_OVERALL_STATUS");
+    res.setId("stationEarlywarnItem");
+    res.addString("station", station);
+    res.addString("new", isNew);
+    std::vector<Message> msgs;
+    for (const auto &item : itemList) {
+        Message msg;
+        msg.addString("device", item.device);
+        msg.addString("_id", item.id);
+        msg.addString("time", item.time);
+        msg.addString("level", item.level);
+        msg.addString("type", item.type);
+        msg.addString("description", item.description);
+        msg.addString("recover", item.isRecover);
+        msg.addString("recover_time", item.recoverTime);
+        msg.addString("measure", item.measure);
+        msg.addString("confirm", item.isConfirm);
+        msg.addString("confirm_time", item.confirmTime);
+        msg.addString("confirm_dsc", item.confirmDesc);
+        msgs.push_back(msg);
+    }
+    res.addPacketArray("items", msgs);
+    return res.toXmlWithLength();
+}
+
+void S2COverallStatusDeviceAlarm::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    id = READS("deviceID");
+    level1 = READ64("level1");
+    level2 = READ64("level2");
+    level3 = READ64("level3");
+    for (const auto &v : pt.get_child("description")) {
+        description.push_back(v.first);
+    }
+}
+
+std::string S2COverallStatusDeviceAlarm::msg() const {
+    return Message::msg("UI_OVERALL_STATUS", "deviceAlarm", {
+        {"station", station},
+        {"device", id},
+        {"level1", std::to_string(level1)},
+        {"level2", std::to_string(level2)},
+        {"level3", std::to_string(level3)},
+    }, {
+        {"description", description}
+    });
+}
+
+void S2COverallStatusDeviceEarlywarn::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    id = READS("deviceID");
+    number = READ64("number");
+    for (const auto &v : pt.get_child("description")) {
+        description.push_back(v.first);
+    }
+}
+
+std::string S2COverallStatusDeviceEarlywarn::msg() const {
+    return Message::msg("UI_OVERALL_STATUS", "deviceEarlywarn", {
+        {"station", station},
+        {"device", id},
+        {"number", std::to_string(number)},
+    }, {
+        {"description", description}
+    });
+}
+
+void S2COverallStatusStationEarlywarn::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    number = READ64("number");
+    for (const auto &v : pt.get_child("description")) {
+        description.push_back(v.first);
+    }
+}
+
+std::string S2COverallStatusStationEarlywarn::msg() const {
+    return Message::msg("UI_OVERALL_STATUS", "deviceEarlywarn", {
+        {"station", station},
+        {"number", std::to_string(number)},
+    }, {
+        {"description", description}
+    });
+}
+
+void S2COverallStatusStationAlarm::retrieveData(const boost::property_tree::ptree &pt) {
+    station = READS("station");
+    level1 = READ64("level1");
+    level2 = READ64("level2");
+    level3 = READ64("level3");
+    for (const auto &v : pt.get_child("description")) {
+        description.push_back(v.first);
+    }
+}
+
+std::string S2COverallStatusStationAlarm::msg() const {
+    return Message::msg("UI_OVERALL_STATUS", "deviceAlarm", {
+        {"station", station},
+        {"level1", std::to_string(level1)},
+        {"level2", std::to_string(level2)},
+        {"level3", std::to_string(level3)},
+    }, {
+        {"description", description}
+    });
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 联锁状态展示
 std::string S2CCIMStatus::msg() const {
     return Message::msg("UI_CIM", "status", {
         {"ci", ci},
@@ -541,4 +877,23 @@ std::string S2CCIMEtConfig::msg() const {
         });
     }
     return msgs;
+}
+
+
+std::string parse(const std::string &s) {
+    // if has "|"
+    uint32_t lastPos{0}, splitPos;
+    std::vector<std::string> choices;
+
+    while ((splitPos = s.find("|", lastPos)) != std::string::npos) {
+        if (splitPos != 0 && s.at(splitPos - 1) == '\\') continue;
+        choices.push_back(s.substr(lastPos, splitPos - lastPos));
+        lastPos = splitPos + 1;
+    }
+    choices.push_back(s.substr(lastPos));
+
+    auto res = choices.at(rand() % choices.size());
+    // rand_r
+
+    return res;
 }

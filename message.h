@@ -95,12 +95,28 @@ class Message {
         strings_[fir] = snd;
     }
 
+    void addString(const std::string &fir, int64_t snd) {
+        strings_[fir] = std::to_string(snd);
+    }
+
+    void addString(const std::string &fir, uint64_t snd) {
+        strings_[fir] = std::to_string(snd);
+    }
+
     void addArray(const std::string &key, const std::vector<std::string> &val) {
         arrays_[key] = val;
     }
 
     void appendArray(const std::string &key, const std::string &val) {
         arrays_[key].push_back(val);
+    }
+
+    void addPacket(const std::string &key, const Message &msg) {
+        packets_[key] = msg;
+    }
+
+    void addPacketArray(const std::string &key, const std::vector<Message> &packetArray) {
+        packetArrays_[key] = packetArray;
     }
 
     // set methods
@@ -114,6 +130,10 @@ class Message {
 
     void setPackets(const std::map<std::string, Message> &packets) {
         packets_ = packets;
+    }
+
+    void setPacketArrays(const std::string &key, const std::map<std::string, std::vector<Message>> &packetArrays) {
+        packetArrays_ = packetArrays;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +183,7 @@ class Message {
     std::pair<std::string, std::string> getIdentity() const {
         return {type_, id_};
     }
-
+    
     ////////////////////////////////////////////////////////////////////////////////////////
     // reset data
     void reset() {
@@ -195,6 +215,7 @@ class Message {
     std::unordered_map<std::string, std::string> strings_;
     std::unordered_map<std::string, std::vector<std::string>> arrays_;
     std::map<std::string, Message> packets_;
+    std::map<std::string, std::vector<Message>> packetArrays_;
 };
 
 

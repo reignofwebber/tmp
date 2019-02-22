@@ -1,0 +1,154 @@
+{
+    "S2C_OverallStatus_DeviceAlarmItem": [
+        {
+            "station" : "CI-CSNHKC",
+            "device" : "TCC-CSNHKC",
+            "new" : "true|false",
+            "items" : [
+                {
+                    "device" : "TCC",
+                    "_id" : "1",
+                    "time" : 0,
+                    "level" : 3,
+                    "type" : "unknown",
+                    "description" : "unknown desc",
+                    "recover" : "true|false",
+                    "recover_time" : 0,
+                    "measure" : "some measure",
+                    "confirm" : "true|false",
+                    "confirm_time" : 0,
+                    "confirm_dsc" : "confirm dsc"
+                }
+            ]
+        }
+    ],
+    "S2C_OverallStatus_DeviceEarlywarnItem" : [
+        {
+            "station" : "CI-CSNHKC",
+            "device" : "TCC-CSNHKC",
+            "new" : "true|false",
+            "items" : [
+                {
+                    "device" : "TCC",
+                    "_id" : "1",
+                    "time" : 0,
+                    "level" : 3,
+                    "type" : "unknown",
+                    "description" : "unknown desc",
+                    "recover" : "true|false",
+                    "recover_time" : 0,
+                    "measure" : "some measure",
+                    "confirm" : "true|false",
+                    "confirm_time" : 0,
+                    "confirm_dsc" : "confirm dsc"
+                }
+            ]
+        }
+    ],
+    "S2C_OverallStatus_DeviceStatus" : [
+        {
+            "station" : "CI-CSNHKC",
+            "device" : "TCC-CSNHKC",
+            "status" : "normal|abnormal|fault|unknown",
+            "description" : [
+                "description 1",
+                "description 2"
+            ]
+        }
+    ],
+    "S2C_OverallStatus_StationAlarmItem" : [
+        {
+            "station" : "CI-CSNHKC",
+            "device" : "TCC-CSNHKC",
+            "new" : "true|false",
+            "items" : [
+                {
+                    "device" : "TCC",
+                    "_id" : "1",
+                    "time" : 0,
+                    "level" : 3,
+                    "type" : "unknown",
+                    "description" : "unknown desc",
+                    "recover" : "true|false",
+                    "recover_time" : 0,
+                    "measure" : "some measure",
+                    "confirm" : "true|false",
+                    "confirm_time" : 0,
+                    "confirm_dsc" : "confirm dsc"
+                }
+            ]
+        }
+    ],
+    "S2C_OverallStatus_StationEarlywarnItem" : [
+        {
+            "station" : "CI-CSNHKC",
+            "device" : "TCC-CSNHKC",
+            "new" : "true|false",
+            "items" : [
+                {
+                    "device" : "TCC",
+                    "_id" : "1",
+                    "time" : 0,
+                    "level" : 3,
+                    "type" : "unknown",
+                    "description" : "unknown desc",
+                    "recover" : "true|false",
+                    "recover_time" : 0,
+                    "measure" : "some measure",
+                    "confirm" : "true|false",
+                    "confirm_time" : 0,
+                    "confirm_dsc" : "confirm dsc"
+                }
+            ]
+        }
+    ],
+    "S2C_OverallStatus_DeviceAlarm" : [
+        {
+            "station" : "CI-CSNHKC",
+            "deviceID" : "TCC-CSNHKC",
+            "level1" : 10,
+            "level2" : 23,
+            "level3" : 45,
+            "description" : [
+                "description 1",
+                "description 2"
+            ]
+        }
+    ],
+    "S2C_OverallStatus_DeviceEarlywarn" : [
+        {
+            "station" : "CI-CSNHKC",
+            "deviceID" : "TCC-CSNHKC",
+            "number" : 10,
+            "description" : [
+                "description 1",
+                "description 2"
+            ]
+        }
+    ],
+    "S2C_OverallStatus_StationEarlywarn" : [
+        {
+            "station" : "CI-CSNHKC",
+            "number" : 10,
+            "description" : [
+                "description 1",
+                "description 2"
+            ]
+        }    
+    ],
+    "S2C_OverallStatus_StationAlarm" : [
+        {
+            "station" : "CI-CSNHKC",
+            "level1" : 10,
+            "level2" : 23,
+            "level3" : 45,
+            "description" : [
+                "description 1",
+                "description 2"
+            ]
+        }
+    ]
+    
+    
+
+}

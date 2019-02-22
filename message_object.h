@@ -9,6 +9,9 @@
 #include <utility>
 #include <tuple>
 
+// boost
+#include <boost/property_tree/ptree.hpp>
+
 // local
 #include "global.h"
 #include "message.h"
@@ -197,25 +200,51 @@ struct MessageObject {
     virtual std::vector<RuleSet> getRuleSet() {
         return {};
     }
+    virtual std::vector<std::pair<RuleSet, Subscribe_Level>> getSupportRules() const {
+        return {};
+    }
+    virtual void retrieveData(const boost::property_tree::ptree &pt) {}
+
+    virtual std::vector<IndentiSet> getIndentiSet() const {
+        std::vector<IndentiSet> sets;
+        for (const auto &r : getSupportRules()) {
+            IndentiSet set = {id, r};
+            sets.push_back(set);
+        }
+        return sets;
+    }
+
+    std::string id;
 };
 
 #define DECLARE_IDENTIFIER()                                \
 Message_Identifier getMessageIdentifier() const override;
 
 
-#define IDENTIFIER(identifier)                       \
+#define IDENTIFIER(identifier)                              \
 Message_Identifier getMessageIdentifier() const override {  \
     return identifier;                                      \
 }
 
+#define MK_RULE(rset, slevel)                               \
+std::make_pair(rset, slevel)
+
+#define RULESET(...)                                        \
+std::vector<std::pair<RuleSet, Subscribe_Level>> getSupportRules() const override { \
+    return {__VA_ARGS__};                                   \
+}
+
+
 #define DECLARE_MSG()                                       \
 std::string msg() const override;
 
+#define NEED_RETRIEVE()                                     \
+void retrieveData(const boost::property_tree::ptree &pt) override;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<MessageObject> getMessageObject(const std::string &msg);
-
+std::shared_ptr<MessageObject> createMessageObject(const std::string &identifier);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 控制协议
 struct C2SAuthentication : public MessageObject {
@@ -1170,15 +1199,37 @@ struct S2CLineSignalChangeStatusCheck : public S2CLineSignalStatusCheck {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 综合状态展示
+struct AlarmItem {
+    std::string device;
+    std::string id;
+    uint64_t time;
+    std::string level;
+    std::string type;
+    std::string description;
+    std::string isRecover;
+    uint64_t recoverTime;
+    std::string measure;
+    std::string isConfirm;
+    uint64_t confirmTime;
+    std::string confirmDesc;
+};
+
 struct S2COverallStatusDeviceStatus : public MessageObject {
     std::string station;
-    std::string deviceId;
-    uint8_t status;
+    std::string status;
     std::vector<std::string> description;
-    // TODO(zf)
+
+    struct DeviceStatus{
+        std::string linkId;
+        std::string linkStatus;
+    };
+    std::string deviceType;
+    std::vector<DeviceStatus> deviceStatusList;
 
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_DeviceStatus)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Line))
 };
 
 struct S2COverallStatusStationStatus : public MessageObject {
@@ -1207,37 +1258,57 @@ struct S2COverallStatusLinkSummary : public S2COverallStatusStatusSummary {
 
 struct S2COverallStatusItem : public MessageObject {
     std::string station;
-    std::string device;
     bool isNew;
     // TODO(zf)
     IDENTIFIER(Invalid_Identifier)
 };
 
 struct S2COverallStatusDeviceAlarmItem : public MessageObject {
+    std::string station;
+    std::string isNew;
+    std::vector<AlarmItem> itemList;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_DeviceAlarmItem)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Device))
 };
 
 struct S2COverallStatusStationAlarmItem : public MessageObject {
+    std::string station;
+    std::string isNew;
+    std::vector<AlarmItem> itemList;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_StationAlarmItem)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Line))
 };
 
 struct S2COverallStatusDeviceAlarm : public MessageObject {
     std::string station;
-    std::string device;
     uint32_t level1;
     uint32_t level2;
     uint32_t level3;
     std::vector<std::string> description;
 
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_DeviceAlarm)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Line))
 };
 
 struct S2COverallStatusStationAlarm : public S2COverallStatusDeviceAlarm {
+    std::string station;
+    uint32_t level1;
+    uint32_t level2;
+    uint32_t level3;
+    std::vector<std::string> description;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_StationAlarm)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Area))
 };
 
 struct S2COverallStatusAlarmSummary : public MessageObject {
@@ -1252,28 +1323,47 @@ struct S2COverallStatusAlarmSummary : public MessageObject {
 };
 
 struct S2COverallStatusDeviceEarlywarnItem : public S2COverallStatusItem {
+    std::string station;
+    std::string isNew;
+    std::vector<AlarmItem> itemList;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_DeviceEarlywarnItem)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Device))
 };
 
 struct S2COverallStatusStationEarlywarnItem : public S2COverallStatusItem {
+    std::string station;
+    std::string isNew;
+    std::vector<AlarmItem> itemList;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_StationEarlywarnItem)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Line))
 };
 
 struct S2COverallStatusDeviceEarlywarn : public MessageObject {
     std::string station;
-    std::string device;
     uint32_t number;
     std::vector<std::string> description;
 
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_DeviceEarlywarn)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Line))
 };
 
 struct S2COverallStatusStationEarlywarn : public S2COverallStatusDeviceEarlywarn {
+    std::string station;
+    uint32_t number;
+    std::vector<std::string> description;
+
     DECLARE_MSG()
+    NEED_RETRIEVE()
     IDENTIFIER(S2C_OverallStatus_StationEarlywarn)
+    RULESET(MK_RULE(OverallRuleSet, Subscribe_Area))
 };
 
 struct S2COverallStatusEarlywarnSummary : public MessageObject {

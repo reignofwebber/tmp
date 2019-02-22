@@ -46,7 +46,7 @@ void Manager::process(SessionPtr session, const std::string &msg) {
         // has verified
         if (verifyed_sessions.find(session) != verifyed_sessions.end()) {
             C2SSubscription s;
-            sessions.insert(std::make_pair(session, Unimplement_RuleSet));
+            // sessions.insert(std::make_pair(session, Unimplement_RuleSet));
         } else {
             log_info << "session is not verified!";
         }
@@ -76,16 +76,20 @@ void Manager::welcome(SessionPtr session) {
 }
 
 void Manager::add_to_send_queue(std::shared_ptr<MessageObject> mobj) {
-    std::for_each(sessions.begin(), sessions.end(), [=](const std::pair<SessionPtr, RuleSet> &p) {
-        auto rulesets = mobj->getRuleSet();
-        if (std::find(rulesets.begin(), rulesets.end(), p.second) != rulesets.end()) {
-            p.first->writeMessage(mobj->msg());
+    std::for_each(sessions.begin(), sessions.end(), [=](const std::pair<SessionPtr, std::vector<IndentiSet>> &p) {
+        for (auto identity : p.second) {
+            // if message object supported any of identify in this session
+            auto rulesets = mobj->getIndentiSet();
+            if (std::find(rulesets.begin(), rulesets.end(), identity) != rulesets.end()) {
+                p.first->writeMessage(mobj->msg());
+                break;
+            }
         }
     });
 }
 
 void Manager::add_to_send_queue(const std::string &msg) {
-    
+
 }
 
 void Manager::initPIO() {

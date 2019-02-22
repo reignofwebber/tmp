@@ -2,10 +2,12 @@
 
 // std
 #include <algorithm>
+#include <unordered_map>
 
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 // local
 #include "log.h"
@@ -43,10 +45,23 @@ void Message::treeFromData(const std::string &root) {
     // packets
     std::string packets_prefix(root + "packets.");
     std::for_each(packets_.begin(), packets_.end(),
-        [this, &packets_prefix](const std::unordered_map<std::string, Message>::value_type &val) {
+        [this, &packets_prefix](const std::pair<std::string, Message> &val) {
             Message subMsg = val.second;
             subMsg.treeFromData("");
             pt_.add_child(packets_prefix + val.first, subMsg.pt_);
+        });
+
+    // packetArrays
+    std::string packetArrays_prefix(root + "packetArrays.");
+    std::for_each(packetArrays_.begin(), packetArrays_.end(),
+        [this, &packetArrays_prefix](const std::pair<std::string, std::vector<Message>> &val) {
+            std::vector<Message> subMsgs = val.second;
+            ptree tmptree;
+            for (auto &subMsg : subMsgs) {
+                subMsg.treeFromData("");
+                tmptree.push_back(std::make_pair("packet", subMsg.pt_));
+            }
+            pt_.add_child(packetArrays_prefix + val.first, tmptree);
         });
 }
 

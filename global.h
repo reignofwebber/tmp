@@ -2,7 +2,9 @@
 #define GLOBAL_H_
 
 // std
+#include <string>
 #include <memory>
+#include <utility>
 
 class Message;
 class MessageObject;
@@ -17,6 +19,7 @@ enum Message_Type {
 
 enum RuleSet {
     All_RuleSet,    
+    OverallRuleSet,
     Unimplement_RuleSet,
 };
 
@@ -31,6 +34,21 @@ enum Playback_Control {
     Playback_Resume,
     Playback_Stop,
 };
+
+enum Subscribe_Type {
+    Sub_Device,
+    Sub_Station,
+};
+
+struct IndentiSet {
+    std::string id;
+    std::pair<RuleSet, Subscribe_Level> ruleSet;
+};
+
+inline bool operator==(const IndentiSet &l, const IndentiSet &r) {
+    return l.id == r.id && l.ruleSet == r.ruleSet;
+}
+
 
 
 #endif  // GLOBAL_H_

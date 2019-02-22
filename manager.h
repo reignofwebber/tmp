@@ -3,6 +3,7 @@
 
 // std
 #include <string>
+#include <vector>
 #include <set>
 #include <map>
 
@@ -33,7 +34,7 @@ class Manager {
  private:
     std::set<SessionPtr> verifyed_sessions;
    //  std::set<SessionPtr> sessions;
-    std::map<SessionPtr, RuleSet> sessions;
+    std::map<SessionPtr, std::vector<IndentiSet>> sessions;
 
     S2CCIMEtConfig m_pioConfig;
 };
