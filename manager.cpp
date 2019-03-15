@@ -15,9 +15,18 @@
 #include "log.h"
 #include "message.h"
 #include "server.h"
+#include "controller.h"
 
 void Manager::start() {
-    initPIO();
+    // initPIO();
+}
+
+void Manager::test() {
+    // controller_->subscribe(makePath("CIRuleSet", "DEVICE", "RBC7"));
+}
+
+void Manager::setController(Controller *controller) {
+    controller_ = controller;
 }
 
 void Manager::process(SessionPtr session, const std::string &msg) {
@@ -42,14 +51,56 @@ void Manager::process(SessionPtr session, const std::string &msg) {
         reply.success = true;
         msgToWrite = reply.msg();
     } else if (identifier == C2S_Subscription) {
-        // TODO(zf)
         // has verified
-        if (verifyed_sessions.find(session) != verifyed_sessions.end()) {
-            C2SSubscription s;
-            // sessions.insert(std::make_pair(session, Unimplement_RuleSet));
-        } else {
-            log_info << "session is not verified!";
-        }
+        // if (verifyed_sessions.find(session) != verifyed_sessions.end()) {
+            auto obj = std::dynamic_pointer_cast<C2SSubscription>(mobj);
+            // sessionMap[session] = makePaths(obj->ruleSet, obj->level, obj->ids);
+            auto paths = makePaths(obj->id, obj->ruleSet, obj->level, obj->ids);
+            if (obj->subscription) {
+                // subcribe
+                std::for_each(paths.begin(), paths.end(), [&](const fs::path &p) {
+                    // can not find this session, all paths' reference count initial to 1
+                    if (sessionMap.find(session) == sessionMap.end()) {
+                        sessionMap[session][p] = 1;
+                        // subcribe from controller
+                        controller_->subscribe(p);
+                    } else {
+                        // can not find path in this session, initalize this path's reference count to 1
+                        if (sessionMap[session].find(p) == sessionMap[session].end()) {
+                            sessionMap[session][p] = 1;
+                            // subcribe from controller
+                            controller_->subscribe(p);
+                        } else {
+                            // exist session && exist path, increase reference count
+                            ++sessionMap[session][p];
+                        }
+                    }
+                    welcome(session, p);
+                });
+            } else {
+                // unsubcribe
+                std::for_each(paths.begin(), paths.end(), [&](const fs::path &p) {
+                    if (sessionMap.find(session) != sessionMap.end()) {
+                        if (sessionMap[session].find(p) != sessionMap[session].end()) {
+                            // referece count == 1, just remove this path from this session
+                            if (sessionMap[session][p] == 1) {
+                                sessionMap[session].erase(p);
+                                controller_->unsubscribe(p);
+                            } else {
+                                --sessionMap[session][p];
+                            }
+                        }
+                        // no path left in this session, just remove it.
+                        if (sessionMap[session].empty()) {
+                            sessionMap.erase(session);
+                        }
+                    }
+
+                });
+            }
+        // } else {
+        //     log_info << "session is not verified!";
+        // }
     } else if (identifier == C2S_Playback_Start) {
         // TODO(zf)
     } else if (identifier == C2S_Playback_Option) {
@@ -67,29 +118,24 @@ void Manager::process(SessionPtr session, const std::string &msg) {
 }
 
 void Manager::unregiste(SessionPtr session) {
-    sessions.erase(session);
-}
-
-void Manager::welcome(SessionPtr session) {
-    // pio config
 
 }
 
-void Manager::add_to_send_queue(std::shared_ptr<MessageObject> mobj) {
-    std::for_each(sessions.begin(), sessions.end(), [=](const std::pair<SessionPtr, std::vector<IndentiSet>> &p) {
-        for (auto identity : p.second) {
-            // if message object supported any of identify in this session
-            auto rulesets = mobj->getIndentiSet();
-            if (std::find(rulesets.begin(), rulesets.end(), identity) != rulesets.end()) {
-                p.first->writeMessage(mobj->msg());
-                break;
-            }
-        }
+void Manager::welcome(SessionPtr session, const fs::path &p) {
+    auto messages = controller_->getAllMessages(p);
+    std::for_each(messages.begin(), messages.end(), [&](const std::string &s) {
+        session->writeMessage(s);
     });
 }
 
-void Manager::add_to_send_queue(const std::string &msg) {
-
+void Manager::add_to_send_queue(const fs::path &p, const std::string &msg) {
+    std::for_each(sessionMap.begin(), sessionMap.end(), [=](const std::pair<SessionPtr, std::map<fs::path, int>> &v) {
+        auto session = v.first;
+        auto pathMap = v.second;
+        if (pathMap.find(p) != pathMap.end()) {
+            session->writeMessage(msg);
+        }
+    });
 }
 
 void Manager::initPIO() {
@@ -110,4 +156,18 @@ void Manager::initPIO() {
             m_pioConfig.pioList[ci][info.id] = info;
         }
     }
+}
+
+fs::path Manager::makePath(const std::string &id, const std::string &ruleSet, const std::string &level, const std::string &deviceId) {
+    fs::path p(".");
+    return p / "data" / id / ruleSet / level / deviceId;
+}
+
+std::vector<fs::path> Manager::makePaths(const std::string &id, const std::string &ruleSet, const std::string &level, const std::vector<std::string> &deviceIds) {
+    std::vector<fs::path> paths;
+    std::for_each(deviceIds.begin(), deviceIds.end(), [&](const std::string &deviceId) {
+        fs::path p(".");
+        paths.push_back(p / "data" / id / ruleSet / level / deviceId);
+    });
+    return paths;
 }

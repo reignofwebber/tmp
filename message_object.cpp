@@ -106,22 +106,16 @@ C2SSubscription::C2SSubscription(const Message &msg) {
     } else {
         subscription = false;
     }
-    if (msg.getId() == "realtime") {
-        type = RealTime_Type;
-    } else {
-        type = History_Type;
-    }
-    // TODO(zf) ruleset
 
-    auto level_s = msg.getString("level");
-    if (level_s == "AREA") {
-        level = Subscribe_Area;
-    } else if (level_s == "LINE") {
-        level = Subscribe_Line;
-    } else {
-        level = Subscribe_Device;
-    }
-    id = msg.getString("id");
+    id = msg.getId();
+    ruleSet = msg.getString("ruleset");
+    level = msg.getString("level");
+    auto deviceId = msg.getString("id");
+    if (deviceId != "")
+        ids.push_back(deviceId);
+
+    auto t_ids = msg.getArray("id");
+    std::copy(t_ids.begin(), t_ids.end(), std::back_inserter(ids));
 }
 
 // playback

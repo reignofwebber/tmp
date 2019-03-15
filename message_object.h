@@ -284,10 +284,10 @@ struct S2CConfigurationReply : public MessageObject {
 
 struct C2SSubscription : public MessageObject {
     bool subscription{true};
-    Message_Type type;
-    RuleSet ruleSet;
-    Subscribe_Level level;
     std::string id;
+    std::string ruleSet;
+    std::string level;
+    std::vector<std::string> ids;
 
     C2SSubscription() = default;
     explicit C2SSubscription(const Message &msg);

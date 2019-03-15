@@ -19,6 +19,8 @@ add_executable(mmServ main.cpp
                       random_engine.cpp
                       task_engine.h
                       task_engine.cpp
+                      file_engine.h
+                      file_engine.cpp
                       log.h
                       message.h
                       message.cpp

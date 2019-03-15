@@ -18,7 +18,7 @@ enum Message_Type {
 };
 
 enum RuleSet {
-    All_RuleSet,    
+    All_RuleSet,
     OverallRuleSet,
     Unimplement_RuleSet,
 };
@@ -49,6 +49,9 @@ inline bool operator==(const IndentiSet &l, const IndentiSet &r) {
     return l.id == r.id && l.ruleSet == r.ruleSet;
 }
 
+class FileEngine;
+class Controller;
+class Manager;
 
 
 #endif  // GLOBAL_H_
