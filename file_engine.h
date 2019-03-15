@@ -32,6 +32,7 @@ class FileEngine {
     void removePath(const fs::path &p);
 
     std::vector<std::string> getAllMessages(const fs::path &p) const;
+    std::vector<std::string> getImmediateMessage(const fs::path &p) const;
 
  private:
     void loopRead();

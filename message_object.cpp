@@ -3,9 +3,16 @@
 // std
 #include <utility>
 #include <algorithm>
+#include <ctime>
+#include <sstream>
+#include <fstream>
 
 // boost
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+
 
 // local
 #include "message.h"
@@ -39,16 +46,46 @@ std::shared_ptr<MessageObject> createMessageObject(const std::string &identifier
     return nullptr;
 }
 
+void saveRecord(const std::string &msg, const std::string &type, const std::string &id) {
+    namespace fs = boost::filesystem;
+
+    std::time_t t = std::time(nullptr);
+    std::tm tm = *std::localtime(&t);
+    std::ostringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H-%M-%S.log");
+    auto p = fs::path {"."} / "data" / "query" / "record" / type / id;
+    if (!fs::exists(p)) {
+        log_info << p << " is not exist, create ...";
+        if (!fs::create_directories(p)) {
+            log_error << "can not create path " << p;
+            return;
+        }
+    } else if (!fs::is_directory(p)) {
+        log_error << "save msg error: path " << p << "is not a directory.";
+        return;
+    }
+    auto fp {p / ss.str()};
+    fs::ofstream out {fp, std::ios::app};
+
+    if (out.is_open()) {
+        out << msg;
+        out.close();
+    }
+
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<MessageObject> getMessageObject(const std::string &msg) {
     Message xmsg(msg);
     auto type = xmsg.getType();
     auto id = xmsg.getId();
+
     if (type == "UI_AUTHENTICATION") {
         return std::make_shared<C2SAuthentication>(xmsg);
     } else if (type == "UI_CONFIGURATION") {
         return std::make_shared<C2SConfiguration>(xmsg);
-    } else if (type == "UI_SUBSCRIPTION") {
+    } else if (type == "UI_SUBSCRIPTION" || type == "UI_UNSUBSCRIPTION") {
         return std::make_shared<C2SSubscription>(xmsg);
     } else if (type == "UI_PLAYBACK") {
         if (id == "start") {
@@ -62,6 +99,9 @@ std::shared_ptr<MessageObject> getMessageObject(const std::string &msg) {
         return std::make_shared<C2SHeartBeat>();
     } else if (type == "UI_CLOSE") {
         return std::make_shared<C2SClose>();
+    } else {
+        saveRecord(msg, type, id);
+        return std::make_shared<C2SQuery>(type, id);
     }
     log_error << "unimplement client msg type!!";
     return nullptr;
@@ -153,6 +193,14 @@ std::string S2CHeartBeat::msg() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 查询
+
+C2SQuery::C2SQuery(const std::string &type, const std::string &id)
+    : type(type), id(id) {
+
+}
+
+
+
 C2SQueryBase::C2SQueryBase(const Message &msg) {
     id = msg.getString("id");
     db = msg.getString("db");

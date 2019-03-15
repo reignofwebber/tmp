@@ -19,11 +19,13 @@ class Session : public std::enable_shared_from_this<Session> {
  public:
     explicit Session(tcp::socket socket, std::shared_ptr<Manager> mgr)
         : socket_(std::move(socket)), mgr_(mgr) {
-        msg_buf_ = new char[1024];
+        msg_buf_ = new char[65535];
+        xml_length_ = new uint32_t;
     }
 
     ~Session() {
         delete[] msg_buf_;
+        delete xml_length_;
         log_trace << "------session released";
     }
 
@@ -67,12 +69,11 @@ class Session : public std::enable_shared_from_this<Session> {
  private:
     void do_read_header() {
         auto self(shared_from_this());
-        std::shared_ptr<uint32_t> xml_length = std::make_shared<uint32_t>();
-        boost::asio::async_read(socket_, boost::asio::buffer(xml_length.get(), 4),
-            [self, this, xml_length](const boost::system::error_code &ec, size_t length) {
+        boost::asio::async_read(socket_, boost::asio::buffer(xml_length_, 4),
+            [self, this](const boost::system::error_code &ec, size_t length) {
                 if (!ec) {
                     if (length == 4) {
-                        auto actual_length = boost::endian::big_to_native(*xml_length);
+                        auto actual_length = boost::endian::big_to_native(*xml_length_);
                         do_read_body(actual_length);
                     } else {
                         log_fatal << "read header length error!";
@@ -101,7 +102,8 @@ class Session : public std::enable_shared_from_this<Session> {
                 if (!ec) {
                     if (length == read_length) {
                         if (auto mgr = mgr_.lock()) {
-                            mgr->process(self, std::string(msg_buf_, length));
+                            std::string msg {msg_buf_, length};
+                            mgr->process(self, msg);
                         } else {
                             log_error << "mgr has been expired";
                         }
@@ -143,6 +145,7 @@ class Session : public std::enable_shared_from_this<Session> {
     int try_count_{0};
     std::weak_ptr<Manager> mgr_;
     char *msg_buf_;
+    uint32_t *xml_length_;
 };
 
 

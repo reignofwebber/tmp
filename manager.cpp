@@ -111,6 +111,13 @@ void Manager::process(SessionPtr session, const std::string &msg) {
         // TODO(zf)
     } else if (identifier == C2S_Close) {
         // TODO(zf)
+    } else if (identifier == C2S_Query) {
+        auto obj = std::dynamic_pointer_cast<C2SQuery>(mobj);
+        auto p = makePath(*obj);
+        auto msgs = controller_->getImmediateMessage(p);
+        std::for_each(msgs.begin(), msgs.end(), [=](const std::string &msg) {
+            session->writeMessage(msg);
+        });
     }
 
 
@@ -158,16 +165,26 @@ void Manager::initPIO() {
     }
 }
 
+fs::path Manager::makePath(const C2SQuery &query) {
+    return fs::path {"."} / "data" / "query" / (query.type) / (query.id);
+}
+
 fs::path Manager::makePath(const std::string &id, const std::string &ruleSet, const std::string &level, const std::string &deviceId) {
-    fs::path p(".");
+    fs::path p {"."};
+    if (deviceId == "") {
+        return p / "data" / id / ruleSet / level;
+    }
     return p / "data" / id / ruleSet / level / deviceId;
 }
 
 std::vector<fs::path> Manager::makePaths(const std::string &id, const std::string &ruleSet, const std::string &level, const std::vector<std::string> &deviceIds) {
     std::vector<fs::path> paths;
+    if (deviceIds.empty()) {
+        paths.push_back(fs::path {"."} / "data" / id / ruleSet / level);
+        return paths;
+    }
     std::for_each(deviceIds.begin(), deviceIds.end(), [&](const std::string &deviceId) {
-        fs::path p(".");
-        paths.push_back(p / "data" / id / ruleSet / level / deviceId);
+        paths.push_back(fs::path {"."} / "data" / id / ruleSet / level / deviceId);
     });
     return paths;
 }

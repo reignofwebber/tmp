@@ -34,6 +34,7 @@ class Manager {
 
  private:
     void initPIO();
+    fs::path makePath(const C2SQuery &query);
     fs::path makePath(const std::string &id, const std::string &ruleSet, const std::string &level, const std::string &deviceId);
     std::vector<fs::path> makePaths(const std::string &id, const std::string &ruleSet, const std::string &level, const std::vector<std::string> &deviceIds);
 

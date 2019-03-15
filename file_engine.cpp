@@ -46,7 +46,7 @@ void FileEngine::removePath(const fs::path &p) {
 
 void FileEngine::retrieveAllMessage(const fs::path &p) {
     if (!fs::exists(p) || !fs::is_directory(p)) {
-        log_error << "no such path " << p.string();
+        log_error << "no such path or path is not a directory " << p.string();
         return;
     }
 
@@ -74,7 +74,7 @@ void FileEngine::retrieveAllMessage(const fs::path &p) {
 
 void FileEngine::retrieveMessage(const fs::path &p, const fs::path &fp) {
     if (!fs::exists(fp) || !fs::is_regular_file(fp)) {
-        log_error << "no such path " << fp.string();
+        log_error << "no such path or path is not a file " << fp.string();
         return;
     }
 
@@ -107,9 +107,34 @@ std::vector<std::string> FileEngine::getAllMessages(const fs::path &p) const {
                        });
         return msgs;
     } else {
-        log_info << "no such path " << p.string();
+        log_info << "no registered path " << p.string();
         return {};
     }
+}
+
+std::vector<std::string> FileEngine::getImmediateMessage(const fs::path &p) const {
+    if (!fs::exists(p) || !fs::is_directory(p)) {
+        log_error << "no such path or path is not a directory " << p.string();
+        return {};
+    }
+
+    std::vector<std::string> res;
+    for (const auto & f : fs::directory_iterator(p)) {
+        auto fp = f.path();
+        if (!fs::is_regular_file(fp)) continue;
+        fs::ifstream in(fp);
+        if (in.is_open()) {
+            std::ostringstream ss;
+            std::copy(std::istreambuf_iterator<char>(in),
+                      std::istreambuf_iterator<char>(),
+                      std::ostreambuf_iterator<char>(ss));
+            auto msg = makeMessage(ss.str());
+            res.push_back(msg);
+        } else {
+            log_error << "can not open file " << fp.string();
+        }
+    }
+    return res;
 }
 
 void FileEngine::loopRead() {

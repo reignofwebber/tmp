@@ -28,7 +28,11 @@ add_executable(mmServ main.cpp
                       util.cpp)
 
 target_include_directories(mmServ PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(mmServ PRIVATE ${Boost_LIBRARIES} ws2_32 mswsock)
+if (WIN32)
+    target_link_libraries(mmServ PRIVATE ${Boost_LIBRARIES} ws2_32 mswsock)
+else()
+    target_link_libraries(mmServ PRIVATE ${Boost_LIBRARIES})
+endif()
 
 target_compile_features(mmServ PRIVATE cxx_std_11)
 

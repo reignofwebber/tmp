@@ -40,6 +40,7 @@ enum Message_Identifier {
     C2S_Close,
 
 // 查询
+    C2S_Query,
     C2S_Query_Select,
     C2S_Query_Count,
     C2S_Query_Distinct,
@@ -349,6 +350,16 @@ struct C2SClose : public MessageObject {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 查询
+
+struct C2SQuery : public MessageObject {
+    std::string type;
+    std::string id;
+
+    C2SQuery(const std::string &type, const std::string &id);
+    IDENTIFIER(C2S_Query)
+};
+
+
 struct C2SQueryBase : public MessageObject {
     std::string id;
     std::string db;

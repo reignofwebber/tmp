@@ -57,3 +57,7 @@ void Controller::update() {
 std::vector<std::string> Controller::getAllMessages(const fs::path &p) const {
     return engine_.getAllMessages(p);
 }
+
+std::vector<std::string> Controller::getImmediateMessage(const fs::path &p) const {
+    return engine_.getImmediateMessage(p);
+}
